@@ -522,7 +522,9 @@ function updateHealthBar() {
 function showJumpScare() {
     // 1. Create the Image
     const scare = document.createElement('img');
-    scare.src = "static/scare.jpg"; 
+    // FOR THE SCARE
+    scare.src = "/static/scare.jpg"; 
+
     
     // 2. Centered Styling
     scare.style.position = 'fixed';
