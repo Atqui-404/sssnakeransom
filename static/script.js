@@ -42,6 +42,7 @@ const randomFacts = [
 
 function startGame() {
     // Screen check
+    cleanupUIEffects();
     if (window.innerWidth < 1024) {
         alert("ACCESS DENIED: PLEASE USE A LAPTOP");
         return;
@@ -64,18 +65,22 @@ function startGame() {
     // Reset game state
     document.getElementById('snake-editor').value = "";
     health = 100;
-    time = 0;
     day = 1;
     updateHealthBar();
     document.getElementById('day-display').innerText = day;
 
+    document.getElementById('intro-modal').style.display = 'block';
+}
+function beginShift() {
+    cleanupUIEffects();
+    document.getElementById('intro-modal').style.display = 'none';
     // Start loops
     gameInterval = setInterval(gameLoop, 100);
     digestionInterval = setInterval(digest, 800);
     popupInterval = setInterval(showRandomPopup, 10000);
 
     // Show first math question immediately
-    setTimeout(() => showMathQuestion(), 2000);
+    setTimeout(() => showMathQuestion(), 1000);
 }
 
 function gameLoop() {
@@ -354,12 +359,14 @@ function showFinalScreen() {
 function restartGame() {
     // Don't reset startTime!
     document.getElementById('view-gameover').style.display = 'none';
+    cleanupUIEffects();
     startGame();
 }
 
 function cleanupUIEffects() {
-    // Stop screen shake
-    document.body.classList.remove('shake');
+
+    document.getElementById('view-game').classList.remove('shake'); 
+    document.body.classList.remove('shake'); // (Optional fallback)
 
     // Remove all random popups
     document.querySelectorAll('.random-popup').forEach(popup => popup.remove());

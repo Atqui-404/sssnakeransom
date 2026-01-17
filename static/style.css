@@ -83,6 +83,7 @@ body {
     box-shadow: 5px 5px 0 #000;
 }
 
+
 .win95-header {
     background: #000080;
     color: white;
@@ -156,6 +157,22 @@ body {
     margin: 10px 0;
 }
 
+#intro-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #000080; /* Windows Blue */
+    border: 5px solid white;
+    color: white;
+    padding: 40px;
+    z-index: 5000; /* On top of everything */
+    text-align: center;
+    width: 500px;
+    font-family: 'Courier New', monospace;
+    box-shadow: 10px 10px 0px rgba(0,0,0,0.5);
+}
+
 /* BUTTONS */
 .btn-main {
     padding: 20px 40px;
@@ -187,18 +204,18 @@ body {
 }
 
 /* MATH MODAL */
+
 #math-modal {
     display: none;
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.98);
-    border: 8px solid red;
-    padding: 40px;
+    background: black;
+    border: 5px solid red;
+    padding: 30px;
     text-align: center;
-    z-index: 1000;
-    min-width: 400px;
+    z-index: 2000;
 }
 
 #math-modal h2 {
