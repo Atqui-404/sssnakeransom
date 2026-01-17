@@ -4,7 +4,7 @@ import datetime
 
 app = Flask(
     __name__,
-    static_folder="static",
+    static_folder="../static", 
     template_folder="templates"
 )
 
