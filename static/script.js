@@ -14,7 +14,7 @@ let popupInterval;
 let startTime = null;
 let captchaCode = '';
 let userCaptchaCode = '';
-let currentColorHex = '';
+window.correctAnswer = null;
 
 // MATH QUESTIONS
 // const mathQuestions = [
@@ -66,7 +66,9 @@ function startGame() {
     document.getElementById('snake-editor').value = "";
     health = 100;
     day = 1;
+    captchaCode = '';
     updateHealthBar();
+    updateStatus("STATUS: HUNGRY", "black")
     document.getElementById('day-display').innerText = day;
 
     document.getElementById('intro-modal').style.display = 'block';
@@ -130,17 +132,21 @@ function digest() {
 }
 
 function showMathQuestion() {
-    // Special cases
-    // if (day === 15) {
-    //     showColordle();
-    //     return;
-    // }
+
 // we changed from 20 to 5 for testing
-    // if (day === 5) {
-    //     showCaptchaPopup();
-    //     setTimeout(() => showMathQuestion(), 5000);
-    //     return;
-    // }
+    if (day === 5 && captchaCode === '') {
+        showCaptchaPopup();
+    }
+
+    if (day === 25) {
+        document.getElementById('modal-day').innerText = day;
+        document.getElementById('math-question').innerText = "Enter the captcha code that appeared";
+        document.getElementById('math-answer').value = '';
+        document.getElementById('math-modal').style.display = 'block';
+
+        window.correctAnswer = captchaCode;
+        return;
+    }
 
     const modal = document.getElementById('math-modal');
     const questionDiv = document.getElementById('math-question');
@@ -195,7 +201,7 @@ function checkMath() {
         day++;
         document.getElementById('day-display').innerText = day;
 
-        if (day > 32) {
+        if (day > 25) {
             // GAME WON!
             showFinalScreen();
         } else {
@@ -205,7 +211,12 @@ function checkMath() {
     } else {
         // Wrong answer = game over
         document.getElementById('math-modal').style.display = 'none';
+        if (day === 7) {
+            triggerGameOver("Hmm... did a captcha code appear somewhere in day 5?")
+        }
+        else {
         triggerGameOver("FAILED. Wow you suck at math.");
+        }
     }
 }
 // eh this not the right colordle man HELPPP
@@ -243,14 +254,47 @@ function showCaptchaPopup() {
     for (let i = 0; i < 5; i++) {
         captchaCode += chars.charAt(Math.floor(Math.random() * chars.length));
     }
+    
+    const popup = document.createElement('div');
+    popup.className = 'random-popup';
+    popup.innerHTML = `
+        <span class="popup-close" onclick="this.parentElement.remove()">×</span>
+        ${captchaCode}
+    `;
 
-    mathQuestions[31].a = captchaCode; // Update final question
-    document.getElementById('captcha-code').innerText = captchaCode;
-    document.getElementById('captcha-popup').style.display = 'block';
+    // Random position
+    popup.style.top = Math.random() * (window.innerHeight - 200) + 'px';
+    popup.style.left = Math.random() * (window.innerWidth - 400) + 'px';
+
+    document.body.appendChild(popup);
+    // document.getElementById('captcha-code').innerText = captchaCode;
+    // document.getElementById('captcha-popup').style.display = 'block';
 }
 
 function closeCaptcha() {
     document.getElementById('captcha-popup').style.display = 'none';
+}
+
+function showFinalCaptchaChallenge() {
+    document.getElementById('math-modal').style.display = 'none';
+
+    document.getElementById('final-captcha-input').value = '';
+    document.getElementById('final-captcha-modal').style.display = 'block';
+}
+
+function checkFinalCaptcha() {
+    const input = document
+        .getElementById('final-captcha-input')
+        .value
+        .trim()
+        .toUpperCase();
+
+    if (input === captchaCode) {
+        document.getElementById('final-captcha-modal').style.display = 'none';
+        showFinalScreen();
+    } else {
+        triggerGameOver("FAILED. Your memory needs improvement.");
+    }
 }
 
 function showRandomPopup() {

@@ -29,7 +29,7 @@
             <div class="game-container">
                 <div class="win95-header">
                     <span>🐍 SnakePad.exe - Critical Process</span>
-                    <span>Day: <span id="day-display">1</span>/32</span>
+                    <span>Day: <span id="day-display">1</span>/25</span>
                 </div>
 
                 <div class="stats-bar">
@@ -45,7 +45,7 @@
 
                 <div class="controls-area">
                     <p id="status-msg">STATUS: HUNGRY</p>
-                    <button class="btn-copy" onclick="copyChicken()">📋 COPY CHICKEN (🐥)</button>
+                    <button class="btn-copy" onclick="copyChicken()">📋 <b>COPY CHICK</b> (🐥)</button>
                     <p><small>(Click Copy → Click Box → Spam CTRL+V)</small></p>
                 </div>
             </div>
@@ -53,11 +53,12 @@
 
         <!-- INTRO MODAL -->
         <div id="intro-modal" style="display: none;">
-            <h2>🛡️ WELCOME TO SSSNAKE RANSOM 🛡️</h2>
-            <p>You are about to begin your first day at the High-Frequency Snake Trading Desk.</p>
-            <p>Your goal is to keep your SASS HEALTH above 0% for 32 days by feeding chickens (🐥) to your snake.</p>
-            <p>Use the "COPY CHICKEN" button to copy chickens to your clipboard, then paste them into the editor below.</p>
-            <p>Be careful! Random security checks and challenges will appear throughout your shift.</p>
+            <h2>WELCOME TO RANSOM SSSNAKE🐍</h2>
+            <p>You're about to begin your first day at the High-Frequency Snake Trading Desk. 🎉</p>
+            <p>Your goal is to keep your HEALTH above 0% for 25 days by feeding chicks (🐥) to your snake, Sass.</p>
+            <p>Use the <B>"COPY CHICK"</B> button to copy chicks to your clipboard, then paste them into the editor.</p>
+            <p>❗Be careful to not starve or overfeed Sass❗</p>
+            <p>All the best.</p>
             <button onclick="beginShift()" style="margin-top: 20px; padding: 10px 30px;">BEGIN SHIFT</button>
         </div>
 
@@ -77,14 +78,6 @@
             <div id="color-display"></div>
             <input type="text" id="color-input" placeholder="#RRGGBB" maxlength="7">
             <button onclick="checkColordle()" style="margin-top: 20px; padding: 15px 30px; font-size: 18px;">SUBMIT</button>
-        </div>
-
-        <!-- CAPTCHA POPUP -->
-        <div id="captcha-popup">
-            <h2>🔒 REMEMBER THIS CODE 🔒</h2>
-            <p>You'll need it at Day 32!</p>
-            <div id="captcha-code">52743</div>
-            <button onclick="closeCaptcha()" style="margin-top: 20px; padding: 10px 30px;">OK</button>
         </div>
 
         <!-- GAMEOVER SCREEN -->
