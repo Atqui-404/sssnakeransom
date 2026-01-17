@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job application?</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div id="mobile-warning">
+        <h1>⛔ ACCESS DENIED ⛔</h1>
+        <p>MOBILE DEVICES NOT SUPPORTED.</p>
+        <p>This simulation requires a <b>Desktop with Chrome Browser</b>.</p>
+    </div>
+
+    <div id="app-container">
+        <!-- BAIT SCREEN -->
+        <div id="view-bait" class="view-section">
+            <h1 class="blink">💰 EXCLUSIVE OPPORTUNITY 💰</h1>
+            <p>Join the High-Frequency Snake Trading Desk</p>
+            <p><i>Salaries start at $500/hr*</i></p>
+            <p style="font-size: 12px;">*Performance based</p>
+            <button class="btn-main" onclick="startGame()">[ ACCEPT JOB OFFER ]</button>
+        </div>
+
+        <!-- GAME SCREEN -->
+        <div id="view-game" class="view-section">
+            <div class="game-container">
+                <div class="win95-header">
+                    <span>🐍 SnakePad.exe - Critical Process</span>
+                    <span>Day: <span id="day-display">1</span>/32</span>
+                </div>
+
+                <div class="stats-bar">
+                    <div><strong>SASS HEALTH:</strong></div>
+                    <div class="health-bar-container">
+                        <div class="health-bar" id="health-bar"></div>
+                        <div class="health-text" id="health-text">100%</div>
+                    </div>
+                    <div>TIME: <span id="timer-display">0</span>s</div>
+                </div>
+
+                <textarea id="snake-editor" spellcheck="false" placeholder="PASTE CHICKENS HERE..."></textarea>
+
+                <div class="controls-area">
+                    <p id="status-msg">STATUS: HUNGRY</p>
+                    <button class="btn-copy" onclick="copyChicken()">📋 COPY CHICKEN (🐥)</button>
+                    <p><small>(Click Copy → Click Box → Spam CTRL+V)</small></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- MATH MODAL -->
+        <div id="math-modal">
+            <h2 class="blink">⚠️ DAY <span id="modal-day">1</span> SECURITY CHECK ⚠️</h2>
+            <p>Solve to continue:</p>
+            <div id="math-question"></div>
+            <input type="text" id="math-answer" placeholder="Enter answer..." autocomplete="off">
+            <button onclick="checkMath()">SUBMIT</button>
+        </div>
+
+        <!-- COLORDLE -->
+        <div id="colordle-container">
+            <h2 style="color: white;">🎨 DAY 15 SPECIAL: COLOR CHALLENGE 🎨</h2>
+            <p style="color: white;">What is this hex color code?</p>
+            <div id="color-display"></div>
+            <input type="text" id="color-input" placeholder="#RRGGBB" maxlength="7">
+            <button onclick="checkColordle()" style="margin-top: 20px; padding: 15px 30px; font-size: 18px;">SUBMIT</button>
+        </div>
+
+        <!-- CAPTCHA POPUP -->
+        <div id="captcha-popup">
+            <h2>🔒 REMEMBER THIS CODE 🔒</h2>
+            <p>You'll need it at Day 32!</p>
+            <div id="captcha-code">52743</div>
+            <button onclick="closeCaptcha()" style="margin-top: 20px; padding: 10px 30px;">OK</button>
+        </div>
+
+        <!-- GAMEOVER SCREEN -->
+        <div id="view-gameover" class="view-section">
+            <h1>YOU ARE FIRED.</h1>
+            <h2 id="death-reason">REASON: UNKNOWN</h2>
+            <button class="btn-main" onclick="restartGame()">TRY AGAIN</button>
+        </div>
+
+        <!-- FINAL SCREEN -->
+        <div id="view-final" class="view-section">
+            <h1>🎉 CONGRATULATIONS! 🎉</h1>
+            <h2 style="color: yellow; font-size: 36px;">You officially wasted</h2>
+            <h1 style="color: red; font-size: 72px;"><span id="final-time">0</span> seconds</h1>
+            <h2 style="color: yellow; font-size: 36px;">of your life!</h2>
+            <p style="font-size: 24px; margin-top: 30px; color: #888;">This is why you don't have a job.</p>
+            <button class="btn-main" onclick="location.reload()">APPLY AGAIN</button>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

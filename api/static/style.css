@@ -1,0 +1,360 @@
+/* --- GLOBAL --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Courier New', monospace;
+    background: #000;
+    color: white;
+    overflow: hidden;
+    position: relative;
+}
+
+/* MOBILE BLOCKER */
+#mobile-warning {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: black;
+    color: red;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    z-index: 10000;
+    padding: 20px;
+}
+
+@media only screen and (max-width: 1024px) {
+    #mobile-warning { display: flex !important; }
+    #app-container { display: none !important; }
+}
+
+/* VIEWS */
+.view-section {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+#view-bait {
+    display: flex;
+    background: #000033;
+    text-align: center;
+}
+
+#view-bait h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+#view-bait p {
+    font-size: 24px;
+    margin: 10px;
+}
+
+/* GAME VIEW */
+#view-game {
+    display: none;
+    background: #008080;
+    padding: 20px;
+}
+
+.game-container {
+    position: absolute;
+    left: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 500px;
+    background: #c0c0c0;
+    border: 3px solid #fff;
+    box-shadow: 5px 5px 0 #000;
+}
+
+.win95-header {
+    background: #000080;
+    color: white;
+    padding: 8px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stats-bar {
+    background: #c0c0c0;
+    color: black;
+    padding: 10px;
+    border-bottom: 2px solid #808080;
+}
+
+.health-bar-container {
+    background: #808080;
+    border: 2px inset #fff;
+    height: 30px;
+    margin: 5px 0;
+    position: relative;
+}
+
+.health-bar {
+    background: linear-gradient(to bottom, #00ff00, #00aa00);
+    height: 100%;
+    transition: width 0.3s, background 0.3s;
+}
+
+.health-bar.medium {
+    background: linear-gradient(to bottom, #ffaa00, #ff8800);
+}
+
+.health-bar.low {
+    background: linear-gradient(to bottom, #ff0000, #aa0000);
+}
+
+.health-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #000;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #fff;
+}
+
+#snake-editor {
+    width: 100%;
+    height: 250px;
+    font-size: 32px;
+    padding: 10px;
+    resize: none;
+    font-family: 'Courier New';
+    border: 2px inset #808080;
+    background: white;
+    
+}
+
+.controls-area {
+    color: black;
+    padding: 15px;
+    text-align: center;
+}
+
+#status-msg {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+/* BUTTONS */
+.btn-main {
+    padding: 20px 40px;
+    font-size: 24px;
+    background: gold;
+    cursor: pointer;
+    border: 5px solid red;
+    margin-top: 20px;
+    font-family: 'Courier New';
+    font-weight: bold;
+}
+
+.btn-main:hover {
+    background: #ffdd00;
+}
+
+.btn-copy {
+    padding: 10px 20px;
+    font-size: 18px;
+    background: #c0c0c0;
+    border: 3px outset white;
+    cursor: pointer;
+    font-family: 'Courier New';
+    margin: 5px;
+}
+
+.btn-copy:active {
+    border: 3px inset white;
+}
+
+/* MATH MODAL */
+#math-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.98);
+    border: 8px solid red;
+    padding: 40px;
+    text-align: center;
+    z-index: 1000;
+    min-width: 400px;
+}
+
+#math-modal h2 {
+    color: red;
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+
+#math-question {
+    font-size: 28px;
+    margin: 30px 0;
+    color: #0f0;
+}
+
+#math-answer {
+    padding: 15px;
+    font-size: 24px;
+    width: 100%;
+    text-align: center;
+    font-family: 'Courier New';
+    border: 3px solid #0f0;
+    background: #000;
+    color: #0f0;
+}
+
+#math-modal button {
+    margin-top: 20px;
+    padding: 15px 30px;
+    font-size: 20px;
+    background: #0f0;
+    border: none;
+    cursor: pointer;
+    font-family: 'Courier New';
+    font-weight: bold;
+}
+
+/* RANDOM POPUP */
+.random-popup {
+    position: fixed;
+    background: yellow;
+    color: black;
+    border: 5px solid red;
+    padding: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    z-index: 500;
+    cursor: move;
+    box-shadow: 10px 10px 0 rgba(0,0,0,0.5);
+    min-width: 300px;
+}
+
+.popup-close {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    cursor: pointer;
+    font-size: 24px;
+    color: red;
+}
+
+/* CAPTCHA POPUP */
+#captcha-popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border: 5px solid #000;
+    padding: 30px;
+    text-align: center;
+    z-index: 2000;
+    color: #000;
+}
+
+#captcha-code {
+    font-size: 48px;
+    letter-spacing: 10px;
+    background: #f0f0f0;
+    padding: 20px;
+    margin: 20px 0;
+    font-family: monospace;
+    border: 3px solid #000;
+    user-select: none;
+}
+
+/* GAMEOVER */
+#view-gameover {
+    background: black;
+    color: red;
+    text-align: center;
+}
+
+#view-gameover h1 {
+    font-size: 64px;
+    margin-bottom: 20px;
+}
+
+/* FINAL SCREEN */
+#view-final {
+    background: #000;
+    text-align: center;
+}
+
+#view-final h1 {
+    font-size: 48px;
+    color: #0f0;
+    margin-bottom: 30px;
+}
+
+/* ANIMATIONS */
+.blink {
+    animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker {
+    50% { opacity: 0; }
+}
+
+.shake {
+    animation: shake 0.5s infinite;
+}
+
+@keyframes shake {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(5px, 5px) rotate(1deg); }
+    50% { transform: translate(0, 0) rotate(0deg); }
+    75% { transform: translate(-5px, 5px) rotate(-1deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+/* COLORDLE */
+#colordle-container {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #000;
+    border: 5px solid #fff;
+    padding: 40px;
+    z-index: 1000;
+    text-align: center;
+}
+
+#color-display {
+    width: 200px;
+    height: 200px;
+    margin: 20px auto;
+    border: 5px solid #fff;
+}
+
+#color-input {
+    padding: 15px;
+    font-size: 20px;
+    width: 100%;
+    text-align: center;
+    font-family: 'Courier New';
+}
