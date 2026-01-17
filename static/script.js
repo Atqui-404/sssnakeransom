@@ -12,6 +12,9 @@ let gameInterval;
 let digestionInterval;
 let popupInterval;
 let startTime = null;
+let wordleWord = '';
+let wordleAttempts = 0;
+const MAX_WORDLE_ATTEMPTS = 6;
 let captchaCode = '';
 let userCaptchaCode = '';
 window.correctAnswer = null;
@@ -38,6 +41,14 @@ const randomFacts = [
     "Did you know? Sass is fake. So is this job.",
     "FUN FACT: Your friends are being productive right now.",
     "REMINDER: You fell for the 'easy money' bait."
+];
+
+const wordleWords = [
+    "CHICK",
+    "HACKS",
+    "CODES"
+    // "BRAIN",
+    // "CRANE"
 ];
 
 function startGame() {
@@ -79,7 +90,7 @@ function beginShift() {
     // Start loops
     gameInterval = setInterval(gameLoop, 100);
     digestionInterval = setInterval(digest, 800);
-    popupInterval = setInterval(showRandomPopup, 10000);
+    popupInterval = setInterval(showRandomPopup, 7000); //shortened from 10s to 7s
 
     // Show first math question immediately
     setTimeout(() => showMathQuestion(), 1000);
@@ -133,12 +144,16 @@ function digest() {
 
 function showMathQuestion() {
 
-// we changed from 20 to 5 for testing
-    if (day === 5 && captchaCode === '') {
+    if (day === 3) {
+        showWordle();
+        return;
+    }
+
+    if (day === 4 && captchaCode === '') {
         showCaptchaPopup();
     }
 
-    if (day === 25) {
+    if (day === 7) {
         document.getElementById('modal-day').innerText = day;
         document.getElementById('math-question').innerText = "Enter the captcha code that appeared";
         document.getElementById('math-answer').value = '';
@@ -201,7 +216,7 @@ function checkMath() {
         day++;
         document.getElementById('day-display').innerText = day;
 
-        if (day > 25) {
+        if (day > 7) {
             // GAME WON!
             showFinalScreen();
         } else {
@@ -219,33 +234,76 @@ function checkMath() {
         }
     }
 }
-// eh this not the right colordle man HELPPP
-function showColordle() {
-    document.getElementById('math-modal').style.display = 'none';
-    
-    // Generate random color
-    const r = Math.floor(Math.random() * 256);
-    const g = Math.floor(Math.random() * 256);
-    const b = Math.floor(Math.random() * 256);
-    currentColorHex = '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
 
-    document.getElementById('color-display').style.backgroundColor = currentColorHex;
-    document.getElementById('color-input').value = '';
-    document.getElementById('colordle-container').style.display = 'block';
+
+function showWordle() {
+    document.getElementById('math-modal').style.display = 'none';
+
+    wordleWord = WORDLE_WORDS[Math.floor(Math.random() * WORDLE_WORDS.length)];
+    wordleAttempts = 0;
+
+    const grid = document.getElementById('wordle-grid');
+    grid.innerHTML = '';
+
+    for (let i = 0; i < MAX_WORDLE_ATTEMPTS; i++) {
+        const row = document.createElement('div');
+        row.className = 'wordle-row';
+
+        for (let j = 0; j < 5; j++) {
+            const cell = document.createElement('div');
+            cell.className = 'wordle-cell';
+            row.appendChild(cell);
+        }
+
+        grid.appendChild(row);
+    }
+
+    document.getElementById('wordle-input').value = '';
+    document.getElementById('wordle-modal').style.display = 'block';
 }
 
-function checkColordle() {
-    const answer = document.getElementById('color-input').value.trim().toUpperCase();
-    
-    if (answer === currentColorHex) {
-        document.getElementById('colordle-container').style.display = 'none';
+function submitWordle() {
+    const input = document
+        .getElementById('wordle-input')
+        .value
+        .toUpperCase();
+
+    if (input.length !== 5) return;
+
+    const row = document.querySelectorAll('.wordle-row')[wordleAttempts];
+    const target = wordleWord.split('');
+    const guess = input.split('');
+
+    // Mark letters
+    guess.forEach((letter, i) => {
+        const cell = row.children[i];
+        cell.innerText = letter;
+
+        if (letter === target[i]) {
+            cell.classList.add('correct'); // green
+        } else if (target.includes(letter)) {
+            cell.classList.add('present'); // yellow
+        } else {
+            cell.classList.add('absent'); // gray
+        }
+    });
+
+    wordleAttempts++;
+    document.getElementById('wordle-input').value = '';
+
+    if (input === wordleWord) {
+        document.getElementById('wordle-modal').style.display = 'none';
         day++;
         document.getElementById('day-display').innerText = day;
-        setTimeout(() => showMathQuestion(), 8000);
-    } else {
-        triggerGameOver("FAILED COLOR CHALLENGE");
+        setTimeout(() => showMathQuestion(), 1000);
+        return;
+    }
+
+    if (wordleAttempts >= MAX_WORDLE_ATTEMPTS) {
+        triggerGameOver("FAILED WORDLE SECURITY CHECK");
     }
 }
+
 
 function showCaptchaPopup() {
     // Generate random 5-char code

@@ -80,6 +80,25 @@
             <button onclick="checkColordle()" style="margin-top: 20px; padding: 15px 30px; font-size: 18px;">SUBMIT</button>
         </div>
 
+        <!-- WORDLE MODAL -->
+        <div id="wordle-modal" style="display:none;">
+            <h2 class="blink">🧩 DAY 6: WORDLE TIME 🧩</h2>
+            <p>Guess the 5-letter word</p>
+
+            <div id="wordle-grid"></div>
+
+            <input
+                id="wordle-input"
+                maxlength="5"
+                placeholder="ENTER WORD"
+                autocomplete="off"
+                style="text-transform:uppercase"
+            />
+
+            <button onclick="submitWordle()">GUESS</button>
+        </div>
+
+
         <!-- GAMEOVER SCREEN -->
         <div id="view-gameover" class="view-section">
             <h1>YOU ARE FIRED.</h1>
