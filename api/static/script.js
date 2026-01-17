@@ -119,19 +119,19 @@ function gameLoop() {
         health -= 2.0;
         updateStatus("⚠️ STARVING! PASTE FASTER!", "red");
         if (!snakeImg.src.includes('snake_hungry.png')) {
-            snakeImg.src = "static/snake_hungry.png";
+            snakeImg.src = "/static/snake_hungry.png";
         }
     } else if (chickenCount > 10) {
         health -= 4.0;
         updateStatus("⚠️⚠️⚠️ OVEREATING! DELETE CHICKENS!", "orange");
         if (!snakeImg.src.includes('snake_full.png')) {
-            snakeImg.src = "static/snake_full.png";
+            snakeImg.src = "/static/snake_full.png";
         }
     } else {
         if (health < 100) health += 0.2;
         updateStatus("DIGESTING...", "green");
         if (!snakeImg.src.includes('snake_normal.png')) {
-            snakeImg.src = "static/snake_normal.png";
+            snakeImg.src = "/static/snake_normal.png";
         }
     }
 
