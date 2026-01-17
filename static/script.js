@@ -41,7 +41,9 @@ const randomFacts = [
     "REMINDER: Time is money. You're losing both.",
     "Did you know? Sass is fake. So is this job.",
     "FUN FACT: Your friends are being productive right now.",
-    "REMINDER: You fell for the 'easy money' bait."
+    "REMINDER: You fell for the 'easy money' bait.",
+    "FUN FACT: I am on 5 hours of sleep for the past 2 days.",
+    "HE IS COMING."
 ];
 
 const wordleWords = [
@@ -160,7 +162,8 @@ function digest() {
 }
 
 function showMathQuestion() {
-
+    if (document.getElementById('view-gameover').style.display === 'flex') return;
+    
     if (day === 3) {
         showWordle();
         return;
@@ -254,6 +257,9 @@ function checkMath() {
 
 
 function showWordle() {
+
+    if (document.getElementById('view-gameover').style.display === 'flex') return;
+
     document.getElementById('math-modal').style.display = 'none';
 
     wordleWord = wordleWords[Math.floor(Math.random() * wordleWords.length)];
@@ -407,14 +413,34 @@ function checkFinalCaptcha() {
 }
 
 function showRandomPopup() {
+    // 1. Pick the text
+    const text = randomFacts[Math.floor(Math.random() * randomFacts.length)];
+    
+    // 2. Identify if this is a "Cursed" fact
+    const isCursed = (text === "HE IS COMING.");
+
+    // 3. Create the Popup
     const popup = document.createElement('div');
     popup.className = 'random-popup';
+    
+    // Note: We removed the onclick="this.parentElement.remove()" from HTML
     popup.innerHTML = `
-        <span class="popup-close" onclick="this.parentElement.remove()">×</span>
-        ${randomFacts[Math.floor(Math.random() * randomFacts.length)]}
+        <span class="popup-close">×</span>
+        ${text}
     `;
     
-    // Random position
+    // 4. THE TRAP: Attach the specific close behavior
+    const closeBtn = popup.querySelector('.popup-close');
+    closeBtn.onclick = function() {
+        popup.remove(); // Remove the popup first
+        
+        if (isCursed) {
+            // WAIT! If it was the cursed text, trigger the scare NOW.
+            showJumpScare();
+        }
+    };
+    
+    // 5. Positioning
     popup.style.top = Math.random() * (window.innerHeight - 200) + 'px';
     popup.style.left = Math.random() * (window.innerWidth - 400) + 'px';
     
@@ -491,6 +517,37 @@ function updateHealthBar() {
     } else if (health < 60) {
         bar.classList.add('medium');
     }
+}
+
+function showJumpScare() {
+    // 1. Create the Image
+    const scare = document.createElement('img');
+    scare.src = "static/scare.jpg"; 
+    
+    // 2. Centered Styling
+    scare.style.position = 'fixed';
+    scare.style.top = '50%';
+    scare.style.left = '50%';
+    // We don't need 'transform' here because the animation handles it now
+    
+    scare.style.width = '100vw'; 
+    scare.style.height = '100vh';
+    scare.style.objectFit = 'contain'; 
+    scare.style.zIndex = '99999';
+    
+    // 3. FASTER ANIMATION (0.25s)
+    scare.style.animation = "flyAtScreen 0.25s ease-in forwards"; 
+
+    // 4. Play Sound (Optional)
+    // const scream = new Audio('static/scream.mp3');
+    // scream.play();
+
+    document.body.appendChild(scare);
+
+    // 5. Cleanup faster (250ms)
+    setTimeout(() => {
+        scare.remove();
+    }, 250);
 }
 
 function triggerGameOver(reason) {
