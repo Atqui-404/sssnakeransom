@@ -18,6 +18,7 @@ const MAX_WORDLE_ATTEMPTS = 6;
 let captchaCode = '';
 let userCaptchaCode = '';
 window.correctAnswer = null;
+let mathTimeout = null; 
 
 // MATH QUESTIONS
 // const mathQuestions = [
@@ -45,10 +46,15 @@ const randomFacts = [
 
 const wordleWords = [
     "CHICK",
-    "HACKS",
-    "CODES"
+    // "HACKS",
+    // "CODES",
     // "BRAIN",
-    // "CRANE"
+    // "CRANE",
+    // "APPLE",
+    // "GRAPE",
+    // "PLANE",
+    // "SNAKE",
+    // "TRICK"
 ];
 
 function startGame() {
@@ -90,10 +96,10 @@ function beginShift() {
     // Start loops
     gameInterval = setInterval(gameLoop, 100);
     digestionInterval = setInterval(digest, 800);
-    popupInterval = setInterval(showRandomPopup, 7000); //shortened from 10s to 7s
+    popupInterval = setInterval(showRandomPopup, 2000); //shortened from 10s to 7s
 
     // Show first math question immediately
-    setTimeout(() => showMathQuestion(), 1000);
+    setTimeout(() => showMathQuestion(), 500);
 }
 
 function gameLoop() {
@@ -239,7 +245,7 @@ function checkMath() {
 function showWordle() {
     document.getElementById('math-modal').style.display = 'none';
 
-    wordleWord = WORDLE_WORDS[Math.floor(Math.random() * WORDLE_WORDS.length)];
+    wordleWord = wordleWords[Math.floor(Math.random() * wordleWords.length)];
     wordleAttempts = 0;
 
     const grid = document.getElementById('wordle-grid');
@@ -306,27 +312,61 @@ function submitWordle() {
 
 
 function showCaptchaPopup() {
-    // Generate random 5-char code
+    // 1. Generate the Code
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     captchaCode = '';
     for (let i = 0; i < 5; i++) {
         captchaCode += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     
+    // 2. Create the Element
     const popup = document.createElement('div');
-    popup.className = 'random-popup';
+    popup.className = 'random-popup'; // Re-use the yellow styling
+    popup.style.zIndex = '2000'; // Make sure it sits on top of other popups
     popup.innerHTML = `
         <span class="popup-close" onclick="this.parentElement.remove()">×</span>
-        ${captchaCode}
+        FUN FACT: The code is ${captchaCode}
     `;
 
-    // Random position
+    // 3. Random Position
     popup.style.top = Math.random() * (window.innerHeight - 200) + 'px';
     popup.style.left = Math.random() * (window.innerWidth - 400) + 'px';
 
     document.body.appendChild(popup);
-    // document.getElementById('captcha-code').innerText = captchaCode;
-    // document.getElementById('captcha-popup').style.display = 'block';
+
+    // 4. ADD DRAG LOGIC (The "Sticky-Proof" Version)
+    popup.onmousedown = (e) => {
+        if (e.target.className === 'popup-close') return;
+
+        let shiftX = e.clientX - popup.getBoundingClientRect().left;
+        let shiftY = e.clientY - popup.getBoundingClientRect().top;
+
+        popup.style.zIndex = 3000; // Bring to absolute front while dragging
+
+        function moveAt(pageX, pageY) {
+            popup.style.left = pageX - shiftX + 'px';
+            popup.style.top = pageY - shiftY + 'px';
+        }
+
+        function onMouseMove(event) {
+            moveAt(event.pageX, event.pageY);
+        }
+
+        // Listen on DOCUMENT so fast movements don't break it
+        document.addEventListener('mousemove', onMouseMove);
+
+        function onMouseUp() {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            popup.style.zIndex = 2000; // Return to normal high Z-index
+        }
+
+        document.addEventListener('mouseup', onMouseUp);
+    };
+
+    popup.ondragstart = function() {
+        return false;
+    };
 }
 
 function closeCaptcha() {
@@ -369,30 +409,47 @@ function showRandomPopup() {
     
     document.body.appendChild(popup);
 
-    // Make draggable
-    let isDragging = false;
-    let offsetX, offsetY;
-
+    // --- FIX: INDEPENDENT DRAG LOGIC ---
     popup.onmousedown = (e) => {
+        // Prevent dragging if clicking the "X" button
         if (e.target.className === 'popup-close') return;
-        isDragging = true;
-        offsetX = e.clientX - popup.offsetLeft;
-        offsetY = e.clientY - popup.offsetTop;
-    };
 
-    document.onmousemove = (e) => {
-        if (isDragging) {
-            popup.style.left = (e.clientX - offsetX) + 'px';
-            popup.style.top = (e.clientY - offsetY) + 'px';
+        // Calculate offset from the corner of the popup
+        let shiftX = e.clientX - popup.getBoundingClientRect().left;
+        let shiftY = e.clientY - popup.getBoundingClientRect().top;
+
+        // Bring the clicked popup to the front
+        popup.style.zIndex = 1000; 
+
+        // 1. Define moving function for THIS specific popup
+        function moveAt(pageX, pageY) {
+            popup.style.left = pageX - shiftX + 'px';
+            popup.style.top = pageY - shiftY + 'px';
         }
+
+        // 2. Move it once immediately (fix jumpiness)
+        moveAt(e.pageX, e.pageY);
+
+        // 3. Define the mousemove handler
+        function onMouseMove(event) {
+            moveAt(event.pageX, event.pageY);
+        }
+
+        // 4. Attach event listeners to document (so you can drag fast)
+        document.addEventListener('mousemove', onMouseMove);
+
+        // 5. Cleanup on mouse up
+        popup.onmouseup = function() {
+            document.removeEventListener('mousemove', onMouseMove);
+            popup.onmouseup = null;
+            popup.style.zIndex = 500; // Reset Z-index (optional)
+        };
     };
 
-    document.onmouseup = () => {
-        isDragging = false;
+    // Disable browser's native drag-and-drop support for the image/text
+    popup.ondragstart = function() {
+        return false;
     };
-
-    // Auto-remove after 8 seconds
-    // setTimeout(() => popup.remove(), 8000);
 }
 
 function copyChicken() {
@@ -429,15 +486,20 @@ function triggerGameOver(reason) {
     clearInterval(gameInterval);
     clearInterval(digestionInterval);
     clearInterval(popupInterval);
+    
 
     cleanupUIEffects();
+    const wordleModal = document.getElementById('wordle-modal');
+    if (wordleModal) wordleModal.style.display = 'none';
     
     document.getElementById('death-reason').innerText = "CAUSE OF TERMINATION: " + reason;
     document.getElementById('view-game').style.display = 'none';
     document.getElementById('view-gameover').style.display = 'flex';
     document.getElementById('captcha-popup').style.display = 'none';
-    document.getElementById('math-modal').style.display = 'none';
-    document.getElementById('colordle-container').style.display = 'none';
+
+    const math = document.getElementById('math-modal');
+    if (math) math.style.display = 'none';
+
     
     try { document.exitFullscreen(); } catch(e) {}
 }
