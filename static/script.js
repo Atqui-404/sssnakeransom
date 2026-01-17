@@ -313,7 +313,7 @@ function submitWordle() {
 
 function showCaptchaPopup() {
     // 1. Generate the Code
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789abcdefghjkmnpqrstuvwxyz';
     captchaCode = '';
     for (let i = 0; i < 5; i++) {
         captchaCode += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -322,7 +322,7 @@ function showCaptchaPopup() {
     // 2. Create the Element
     const popup = document.createElement('div');
     popup.className = 'random-popup'; // Re-use the yellow styling
-    popup.style.zIndex = '2000'; // Make sure it sits on top of other popups
+    popup.style.zIndex = '2500'; // Make sure it sits on top of other popups
     popup.innerHTML = `
         <span class="popup-close" onclick="this.parentElement.remove()">×</span>
         FUN FACT: The code is ${captchaCode}
@@ -419,7 +419,7 @@ function showRandomPopup() {
         let shiftY = e.clientY - popup.getBoundingClientRect().top;
 
         // Bring the clicked popup to the front
-        popup.style.zIndex = 1000; 
+        popup.style.zIndex = 2500; 
 
         // 1. Define moving function for THIS specific popup
         function moveAt(pageX, pageY) {
@@ -483,27 +483,48 @@ function updateHealthBar() {
 }
 
 function triggerGameOver(reason) {
+    // 1. STOP EVERYTHING
     clearInterval(gameInterval);
     clearInterval(digestionInterval);
     clearInterval(popupInterval);
     
+    // Stop the pending math question if it's waiting to pop up
+    if (typeof mathTimeout !== 'undefined' && mathTimeout) {
+        clearTimeout(mathTimeout);
+    }
 
+    // 2. FORCE HIDE ALL MODALS (The "Nuclear Option")
+    // We use a helper here so if one ID is wrong, the others still close.
+    safeHide('math-modal');          // <--- This is the one from your screenshot
+    safeHide('intro-modal');
+    safeHide('wordle-modal');
+    safeHide('captcha-popup');
+    safeHide('colordle-container');
+    safeHide('final-captcha-modal');
+
+    // 3. Remove any drag-and-drop elements
     cleanupUIEffects();
-    const wordleModal = document.getElementById('wordle-modal');
-    if (wordleModal) wordleModal.style.display = 'none';
     
-    document.getElementById('death-reason').innerText = "CAUSE OF TERMINATION: " + reason;
-    document.getElementById('view-game').style.display = 'none';
-    document.getElementById('view-gameover').style.display = 'flex';
-    document.getElementById('captcha-popup').style.display = 'none';
+    // 4. Show the Death Screen
+    const deathReasonEl = document.getElementById('death-reason');
+    if (deathReasonEl) deathReasonEl.innerText = "CAUSE OF TERMINATION: " + reason;
 
-    const math = document.getElementById('math-modal');
-    if (math) math.style.display = 'none';
-
+    safeHide('view-game');
     
+    const viewGameOver = document.getElementById('view-gameover');
+    if (viewGameOver) viewGameOver.style.display = 'flex';
+
+    // 5. Exit Fullscreen
     try { document.exitFullscreen(); } catch(e) {}
 }
 
+function safeHide(id) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.style.display = 'none';
+        el.classList.remove('show'); // Just in case you use classes later
+    }
+}
 function showFinalScreen() {
     clearInterval(gameInterval);
     clearInterval(digestionInterval);

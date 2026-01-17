@@ -261,7 +261,7 @@ body {
     padding: 20px;
     font-size: 18px;
     font-weight: bold;
-    z-index: 500;
+    z-index: 2500;
     cursor: move;
     box-shadow: 10px 10px 0 rgba(0,0,0,0.5);
     min-width: 300px;
@@ -280,7 +280,8 @@ body {
 #wordle-grid {
     display: grid;
     gap: 8px;
-    margin: 20px 0;
+    margin: 20px auto; /* Fixes "Cramped to one side" (Centers the block) */
+    justify-content: center; /* Centers the rows inside the block */
 }
 
 .wordle-row {
@@ -323,8 +324,9 @@ body {
     border: 5px solid red;
     padding: 30px;
     text-align: center;
-    z-index: 3000; /* Higher than math modal */
-    width: 400px;
+    z-index: 3000;
+    width: 600px; /* Increased from 400px */
+    
     box-shadow: 10px 10px 0 rgba(0,0,0,0.5);
 }
 
@@ -362,7 +364,7 @@ body {
     font-size: 18px;
     font-weight: bold;
     text-align: center;
-    z-index: 500;
+    z-index: 2500;
     color: #000;
     box-shadow: 10px 10px 0 rgba(0,0,0,0.5);
 }
