@@ -33,7 +33,6 @@ function preloadImages() {
     imagesToPreload.forEach((src) => {
         const img = new Image();
         img.src = src;
-        // This forces the browser to download and cache them NOW
     });
 }
 // Call it immediately
@@ -91,6 +90,10 @@ function startGame() {
         document.documentElement.requestFullscreen(); 
     } catch(e) {}
 
+    const introAudio = document.getElementById('audio-intro');
+    introAudio.volume = 0.7; 
+    introAudio.play().catch(e => console.log("Audio error:", e));
+
     // Switch views
     document.getElementById('view-bait').style.display = 'none';
     document.getElementById('view-game').style.display = 'block';
@@ -109,7 +112,19 @@ function startGame() {
 function beginShift() {
     cleanupUIEffects();
     document.getElementById('intro-modal').style.display = 'none';
+    
+    // --- SOUND: SWAP MUSIC ---
+    const introAudio = document.getElementById('audio-intro');
+    const bgAudio = document.getElementById('audio-bg');
+    
+    introAudio.pause();          // Stop Intro
+    introAudio.currentTime = 0;  // Rewind Intro
+    
+    bgAudio.volume = 1.0;        // Set Volume
+    bgAudio.play();              // Start Game Music
+
     // Start loops
+    gameInterval = setInterval(gameLoop, 100);
     gameInterval = setInterval(gameLoop, 100);
     digestionInterval = setInterval(digest, 800);
     popupInterval = setInterval(showRandomPopup, 2000); //shortened from 10s to 7s
@@ -534,9 +549,15 @@ function updateHealthBar() {
 }
 
 function showJumpScare() {
+    // 1. Setup Audio (Uncommented!)
+    const scream = new Audio('/static/guest-1337-scream.mp3');
+    scream.volume = 1.0;
+
+    // 2. Setup Image
     const scare = document.createElement('img');
     scare.src = "/static/scare.jpg"; 
     
+    // 3. Style it (Start invisible to prevent "broken icon" flash)
     scare.style.position = 'fixed';
     scare.style.top = '50%';
     scare.style.left = '50%';
@@ -544,53 +565,78 @@ function showJumpScare() {
     scare.style.height = '100vh';
     scare.style.objectFit = 'contain'; 
     scare.style.zIndex = '99999';
-    
-    // Hide it initially so we don't see a broken icon
-    scare.style.opacity = '0';
+    scare.style.opacity = '0'; 
 
     document.body.appendChild(scare);
 
-    // ONLY START ANIMATION WHEN LOADED
+    // 4. THE FIX: Only trigger animation/sound when the image is ACTUALLY ready
     scare.onload = function() {
-        scare.style.opacity = '1'; // Make visible
+        // Now we are safe to show it
+        scare.style.opacity = '1';
+        
+        // Play Sound
+        scream.play().catch(e => console.log("Audio play failed:", e));
+
+        // Run Animation
         scare.style.animation = "flyAtScreen 0.25s ease-in forwards"; 
 
-        // Start the removal timer NOW, not earlier
+        // Schedule Cleanup (Exactly matches animation time)
         setTimeout(() => {
-            scare.remove();
-        }, 250);
+            scare.remove();       // Delete Image
+            scream.pause();       // Stop Sound
+            scream.currentTime = 0; // Reset Sound
+        }, 500);
     };
 
-    // If it's already cached (fast load), trigger immediately
+    // 5. Handle Cached Images (If it loads instantly, trigger manually)
     if (scare.complete) {
         scare.onload();
     }
 }
 
 function triggerGameOver(reason) {
+    // --- SAFETY LOCK: PREVENT DOUBLE DEATH ---
+    // If the game over screen is already visible, STOP immediately.
+    if (document.getElementById('view-gameover').style.display === 'flex') return;
+    
+    // If Game WON is already showing, STOP!
+    if (document.getElementById('view-final').style.display === 'flex') return;
+    // -----------------------------------------
+
     // 1. STOP EVERYTHING
     clearInterval(gameInterval);
     clearInterval(digestionInterval);
     clearInterval(popupInterval);
     
-    // Stop the pending math question if it's waiting to pop up
+    // Stop pending math
     if (typeof mathTimeout !== 'undefined' && mathTimeout) {
         clearTimeout(mathTimeout);
     }
 
-    // 2. FORCE HIDE ALL MODALS (The "Nuclear Option")
-    // We use a helper here so if one ID is wrong, the others still close.
-    safeHide('math-modal');          // <--- This is the one from your screenshot
+    // --- STOP ALL OTHER SOUNDS ---
+    const bgMusic = document.getElementById('audio-bg');
+    bgMusic.pause();
+    bgMusic.currentTime = 0;
+    // -----------------------------
+
+    // --- PLAY FAIL SOUND ONCE ---
+    const failSoundFile = Math.random() > 0.5 ? '/static/meow-meow-meow-tiktok.mp3' : '/static/i-got-this-fahhhhhh.mp3';
+    const failAudio = new Audio(failSoundFile);
+    failAudio.volume = 0.8;
+    failAudio.play();
+    // ----------------------------
+
+    // 2. HIDE MODALS
+    safeHide('math-modal');
     safeHide('intro-modal');
     safeHide('wordle-modal');
     safeHide('captcha-popup');
-    safeHide('colordle-container');
     safeHide('final-captcha-modal');
 
-    // 3. Remove any drag-and-drop elements
+    // 3. CLEANUP UI
     cleanupUIEffects();
     
-    // 4. Show the Death Screen
+    // 4. SHOW DEATH SCREEN
     const deathReasonEl = document.getElementById('death-reason');
     if (deathReasonEl) deathReasonEl.innerText = "CAUSE OF TERMINATION: " + reason;
 
@@ -599,7 +645,6 @@ function triggerGameOver(reason) {
     const viewGameOver = document.getElementById('view-gameover');
     if (viewGameOver) viewGameOver.style.display = 'flex';
 
-    // 5. Exit Fullscreen
     try { document.exitFullscreen(); } catch(e) {}
 }
 
@@ -610,10 +655,20 @@ function safeHide(id) {
         el.classList.remove('show'); // Just in case you use classes later
     }
 }
+
 function showFinalScreen() {
+    // Stop loops
     clearInterval(gameInterval);
     clearInterval(digestionInterval);
     clearInterval(popupInterval);
+    cleanupUIEffects();
+
+    // --- SOUND: VICTORY ---
+    document.getElementById('audio-bg').pause(); // Stop game music
+    
+    const winAudio = new Audio('/static/john-cena-meme-original.mp3');
+    winAudio.volume = 1.0;
+    winAudio.play();
 
     cleanupUIEffects();
     
@@ -627,10 +682,21 @@ function showFinalScreen() {
 }
 
 function restartGame() {
-    // Don't reset startTime!
+    const bgAudio = document.getElementById('audio-bg');
+    const introAudio = document.getElementById('audio-intro');
+
+    if (bgAudio) {
+        bgAudio.pause();
+        bgAudio.currentTime = 0;
+    }
+    if (introAudio) {
+        introAudio.pause();
+        introAudio.currentTime = 0;
+    }
+
     document.getElementById('view-gameover').style.display = 'none';
     cleanupUIEffects();
-    startGame();
+    location.reload();
 }
 
 function cleanupUIEffects() {
