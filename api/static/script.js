@@ -20,6 +20,9 @@ let userCaptchaCode = '';
 window.correctAnswer = null;
 let mathTimeout = null; 
 
+// Audio Tracker for Snake Sounds ---
+let snakeSFX = null; 
+// ------------------------------------------
 
 // --- PRELOAD IMAGES ---
 const imagesToPreload = [
@@ -93,7 +96,7 @@ function startGame() {
     } catch(e) {}
 
     const introAudio = document.getElementById('audio-intro');
-    introAudio.volume = 0.7; 
+    introAudio.volume = 0.5; 
     introAudio.play().catch(e => console.log("Audio error:", e));
 
     // Switch views
@@ -127,9 +130,9 @@ function beginShift() {
 
     // Start loops
     gameInterval = setInterval(gameLoop, 100);
-    gameInterval = setInterval(gameLoop, 100);
+    // Removed duplicate gameInterval call here
     digestionInterval = setInterval(digest, 800);
-    popupInterval = setInterval(showRandomPopup, 2000); //shortened from 10s to 7s
+    popupInterval = setInterval(showRandomPopup, 2000); 
 
     // Show first math question immediately
     setTimeout(() => showMathQuestion(), 500);
@@ -145,20 +148,33 @@ function gameLoop() {
 
     // Select the image
     const snakeImg = document.getElementById('snake-avatar');
+    
     // Game rules
     if (chickenCount === 0) {
         health -= 2.0;
         updateStatus("⚠️ STARVING! PASTE FASTER!", "red");
+        
         if (!snakeImg.src.includes('snake_hungry.png')) {
             snakeImg.src = "/static/snake_hungry.png";
-            new Audio('/static/starve.mp4').play();
+            
+            // --- UPDATED: Track the audio ---
+            if (snakeSFX) { snakeSFX.pause(); snakeSFX.currentTime = 0; }
+            snakeSFX = new Audio('/static/starve.mp4');
+            snakeSFX.play();
+            // --------------------------------
         }
     } else if (chickenCount > 10) {
         health -= 4.0;
         updateStatus("⚠️⚠️⚠️ OVEREATING! DELETE CHICKENS!", "orange");
+        
         if (!snakeImg.src.includes('snake_full.png')) {
             snakeImg.src = "/static/snake_full.png";
-            new Audio('/static/full.mp4').play();
+            
+            // --- UPDATED: Track the audio ---
+            if (snakeSFX) { snakeSFX.pause(); snakeSFX.currentTime = 0; }
+            snakeSFX = new Audio('/static/full.mp4');
+            snakeSFX.play();
+            // --------------------------------
         }
     } else {
         if (health < 100) health += 0.2;
@@ -197,16 +213,16 @@ function digest() {
 function showMathQuestion() {
     if (document.getElementById('view-gameover').style.display === 'flex') return;
     
-    if (day === 3) {
+    if (day === 6) {
         showWordle();
         return;
     }
 
-    if (day === 4 && captchaCode === '') {
+    if (day === 13 && captchaCode === '') {
         showCaptchaPopup();
     }
 
-    if (day === 7) {
+    if (day === 20) {
         document.getElementById('modal-day').innerText = day;
         document.getElementById('math-question').innerText = "Enter the captcha code that appeared";
         document.getElementById('math-answer').value = '';
@@ -218,25 +234,18 @@ function showMathQuestion() {
 
     const modal = document.getElementById('math-modal');
     const questionDiv = document.getElementById('math-question');
-    // const question = mathQuestions[day - 1];
 
     document.getElementById('modal-day').innerText = day;
-    // questionDiv.innerText = question.q;
-    // document.getElementById('math-answer').value = '';
-    // modal.style.display = 'block';
 
-        // Generate two random numbers between 1 and 100
     const num1 = Math.floor(Math.random() * 100) + 1; 
     const num2 = Math.floor(Math.random() * 100) + 1;
     
-    // Randomly choose an operation: addition or subtraction
     const operations = ['+', '-'];
     const operation = operations[Math.floor(Math.random() * operations.length)];
 
     let question;
     let answer;
 
-    // Create the question and calculate the answer based on the operation
     switch (operation) {
         case '+':
             question = `What is ${num1} + ${num2}?`;
@@ -250,37 +259,31 @@ function showMathQuestion() {
             break;
     }
 
-    questionDiv.innerText = question; // Display the question
-    document.getElementById('math-answer').value = ''; // Clear the input field
-    modal.style.display = 'block'; // Show the modal
+    questionDiv.innerText = question; 
+    document.getElementById('math-answer').value = ''; 
+    modal.style.display = 'block'; 
 
-    // Store the correct answer for later verification
     window.correctAnswer = answer; 
 }
 
 function checkMath() {
     const answer = document.getElementById('math-answer').value.trim();
-    // const correctAnswer = mathQuestions[day - 1].a;
     const correctAnswer = window.correctAnswer;
 
     if (answer === correctAnswer) {
-        // Correct!
         document.getElementById('math-modal').style.display = 'none';
         day++;
         document.getElementById('day-display').innerText = day;
 
-        if (day > 7) {
-            // GAME WON!
+        if (day > 20) {
             showFinalScreen();
         } else {
-            // Next question
             setTimeout(() => showMathQuestion(), 8000);
         }
     } else {
-        // Wrong answer = game over
         document.getElementById('math-modal').style.display = 'none';
-        if (day === 7) {
-            triggerGameOver("Hmm... did a captcha code appear somewhere in day 5?")
+        if (day === 20) {
+            triggerGameOver("Hmm... did a captcha code appear somewhere earlier?")
         }
         else {
         triggerGameOver("FAILED. Wow you suck at math.");
@@ -288,9 +291,7 @@ function checkMath() {
     }
 }
 
-
 function showWordle() {
-
     if (document.getElementById('view-gameover').style.display === 'flex') return;
 
     document.getElementById('math-modal').style.display = 'none';
@@ -330,17 +331,16 @@ function submitWordle() {
     const target = wordleWord.split('');
     const guess = input.split('');
 
-    // Mark letters
     guess.forEach((letter, i) => {
         const cell = row.children[i];
         cell.innerText = letter;
 
         if (letter === target[i]) {
-            cell.classList.add('correct'); // green
+            cell.classList.add('correct'); 
         } else if (target.includes(letter)) {
-            cell.classList.add('present'); // yellow
+            cell.classList.add('present'); 
         } else {
-            cell.classList.add('absent'); // gray
+            cell.classList.add('absent'); 
         }
     });
 
@@ -360,38 +360,33 @@ function submitWordle() {
     }
 }
 
-
 function showCaptchaPopup() {
-    // 1. Generate the Code
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789abcdefghjkmnpqrstuvwxyz';
     captchaCode = '';
     for (let i = 0; i < 5; i++) {
         captchaCode += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     
-    // 2. Create the Element
     const popup = document.createElement('div');
-    popup.className = 'random-popup'; // Re-use the yellow styling
-    popup.style.zIndex = '2500'; // Make sure it sits on top of other popups
+    popup.className = 'random-popup'; 
+    popup.style.zIndex = '2500'; 
     popup.innerHTML = `
         <span class="popup-close" onclick="this.parentElement.remove()">×</span>
         FUN FACT: The code is ${captchaCode}
     `;
 
-    // 3. Random Position
     popup.style.top = Math.random() * (window.innerHeight - 200) + 'px';
     popup.style.left = Math.random() * (window.innerWidth - 400) + 'px';
 
     document.body.appendChild(popup);
 
-    // 4. ADD DRAG LOGIC (The "Sticky-Proof" Version)
     popup.onmousedown = (e) => {
         if (e.target.className === 'popup-close') return;
 
         let shiftX = e.clientX - popup.getBoundingClientRect().left;
         let shiftY = e.clientY - popup.getBoundingClientRect().top;
 
-        popup.style.zIndex = 3000; // Bring to absolute front while dragging
+        popup.style.zIndex = 3000; 
 
         function moveAt(pageX, pageY) {
             popup.style.left = pageX - shiftX + 'px';
@@ -402,13 +397,12 @@ function showCaptchaPopup() {
             moveAt(event.pageX, event.pageY);
         }
 
-        // Listen on DOCUMENT so fast movements don't break it
         document.addEventListener('mousemove', onMouseMove);
 
         function onMouseUp() {
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
-            popup.style.zIndex = 2000; // Return to normal high Z-index
+            popup.style.zIndex = 2000; 
         }
 
         document.addEventListener('mouseup', onMouseUp);
@@ -446,77 +440,71 @@ function checkFinalCaptcha() {
 }
 
 function showRandomPopup() {
-    // 1. Pick the text
     const text = randomFacts[Math.floor(Math.random() * randomFacts.length)];
-    
-    // 2. Identify if this is a "Cursed" fact
     const isCursed = (text === "HE IS COMING.");
 
-    // 3. Create the Popup
     const popup = document.createElement('div');
     popup.className = 'random-popup';
     
-    // Note: We removed the onclick="this.parentElement.remove()" from HTML
     popup.innerHTML = `
         <span class="popup-close">×</span>
         ${text}
     `;
     
-    // 4. THE TRAP: Attach the specific close behavior
     const closeBtn = popup.querySelector('.popup-close');
     closeBtn.onclick = function() {
-        popup.remove(); // Remove the popup first
-        
+        popup.remove(); 
         if (isCursed) {
-            // WAIT! If it was the cursed text, trigger the scare NOW.
             showJumpScare();
         }
     };
     
-    // 5. Positioning
     popup.style.top = Math.random() * (window.innerHeight - 200) + 'px';
     popup.style.left = Math.random() * (window.innerWidth - 400) + 'px';
     
     document.body.appendChild(popup);
 
-    // --- FIX: INDEPENDENT DRAG LOGIC ---
     popup.onmousedown = (e) => {
         // Prevent dragging if clicking the "X" button
         if (e.target.className === 'popup-close') return;
 
-        // Calculate offset from the corner of the popup
+        // Calculate offset
         let shiftX = e.clientX - popup.getBoundingClientRect().left;
         let shiftY = e.clientY - popup.getBoundingClientRect().top;
 
-        // Bring the clicked popup to the front
+        // Bring to front
         popup.style.zIndex = 2500; 
 
-        // 1. Define moving function for THIS specific popup
         function moveAt(pageX, pageY) {
             popup.style.left = pageX - shiftX + 'px';
             popup.style.top = pageY - shiftY + 'px';
         }
 
-        // 2. Move it once immediately (fix jumpiness)
+        // Move once immediately
         moveAt(e.pageX, e.pageY);
 
-        // 3. Define the mousemove handler
         function onMouseMove(event) {
             moveAt(event.pageX, event.pageY);
         }
 
-        // 4. Attach event listeners to document (so you can drag fast)
+        // Listen for moves on the WHOLE DOCUMENT
         document.addEventListener('mousemove', onMouseMove);
 
-        // 5. Cleanup on mouse up
-        popup.onmouseup = function() {
+        // --- THE FIX IS HERE ---
+        // We define a separate function for mouse up
+        function onMouseUp() {
+            // Stop tracking movement
             document.removeEventListener('mousemove', onMouseMove);
-            popup.onmouseup = null;
-            popup.style.zIndex = 500; // Reset Z-index (optional)
-        };
+            // Stop tracking the release (clean up this listener)
+            document.removeEventListener('mouseup', onMouseUp);
+            
+            popup.style.zIndex = 500; // Reset Z-index
+        }
+
+        // Listen for release on the WHOLE DOCUMENT (not just the popup)
+        document.addEventListener('mouseup', onMouseUp);
     };
 
-    // Disable browser's native drag-and-drop support for the image/text
     popup.ondragstart = function() {
         return false;
     };
@@ -543,7 +531,6 @@ function updateHealthBar() {
     bar.style.width = health + '%';
     text.innerText = Math.floor(health) + '%';
 
-    // Color coding
     bar.className = 'health-bar';
     if (health < 30) {
         bar.classList.add('low');
@@ -553,15 +540,12 @@ function updateHealthBar() {
 }
 
 function showJumpScare() {
-    // 1. Setup Audio (Uncommented!)
     const scream = new Audio('/static/guest-1337-scream.mp3');
     scream.volume = 1.0;
 
-    // 2. Setup Image
     const scare = document.createElement('img');
     scare.src = "/static/scare.jpg"; 
     
-    // 3. Style it (Start invisible to prevent "broken icon" flash)
     scare.style.position = 'fixed';
     scare.style.top = '50%';
     scare.style.left = '50%';
@@ -573,74 +557,64 @@ function showJumpScare() {
 
     document.body.appendChild(scare);
 
-    // 4. THE FIX: Only trigger animation/sound when the image is ACTUALLY ready
     scare.onload = function() {
-        // Now we are safe to show it
         scare.style.opacity = '1';
-        
-        // Play Sound
         scream.play().catch(e => console.log("Audio play failed:", e));
-
-        // Run Animation
         scare.style.animation = "flyAtScreen 0.25s ease-in forwards"; 
 
-        // Schedule Cleanup (Exactly matches animation time)
         setTimeout(() => {
-            scare.remove();       // Delete Image
-            scream.pause();       // Stop Sound
-            scream.currentTime = 0; // Reset Sound
+            scare.remove(); 
+            scream.pause(); 
+            scream.currentTime = 0; 
         }, 500);
     };
 
-    // 5. Handle Cached Images (If it loads instantly, trigger manually)
     if (scare.complete) {
         scare.onload();
     }
 }
 
 function triggerGameOver(reason) {
-    // --- SAFETY LOCK: PREVENT DOUBLE DEATH ---
-    // If the game over screen is already visible, STOP immediately.
+    // Safety Locks
     if (document.getElementById('view-gameover').style.display === 'flex') return;
-    
-    // If Game WON is already showing, STOP!
     if (document.getElementById('view-final').style.display === 'flex') return;
-    // -----------------------------------------
 
     // 1. STOP EVERYTHING
     clearInterval(gameInterval);
     clearInterval(digestionInterval);
     clearInterval(popupInterval);
     
-    // Stop pending math
     if (typeof mathTimeout !== 'undefined' && mathTimeout) {
         clearTimeout(mathTimeout);
     }
 
     // --- STOP ALL OTHER SOUNDS ---
     const bgMusic = document.getElementById('audio-bg');
-    bgMusic.pause();
-    bgMusic.currentTime = 0;
-    // -----------------------------
+    if (bgMusic) {
+        bgMusic.pause();
+        bgMusic.currentTime = 0;
+    }
+    
+    // --- UPDATED: Stop Snake SFX ---
+    if (snakeSFX) {
+        snakeSFX.pause();
+        snakeSFX.currentTime = 0;
+    }
+    // -------------------------------
 
-    // --- PLAY FAIL SOUND ONCE ---
     const failSoundFile = Math.random() > 0.5 ? '/static/meow-meow-meow-tiktok.mp3' : '/static/i-got-this-fahhhhhh.mp3';
     const failAudio = new Audio(failSoundFile);
     failAudio.volume = 0.8;
     failAudio.play();
-    // ----------------------------
 
-    // 2. HIDE MODALS
     safeHide('math-modal');
     safeHide('intro-modal');
     safeHide('wordle-modal');
     safeHide('captcha-popup');
     safeHide('final-captcha-modal');
 
-    // 3. CLEANUP UI
     cleanupUIEffects();
     
-    // 4. SHOW DEATH SCREEN
     const deathReasonEl = document.getElementById('death-reason');
     if (deathReasonEl) deathReasonEl.innerText = "CAUSE OF TERMINATION: " + reason;
 
@@ -656,19 +630,25 @@ function safeHide(id) {
     const el = document.getElementById(id);
     if (el) {
         el.style.display = 'none';
-        el.classList.remove('show'); // Just in case you use classes later
+        el.classList.remove('show'); 
     }
 }
 
 function showFinalScreen() {
-    // Stop loops
     clearInterval(gameInterval);
     clearInterval(digestionInterval);
     clearInterval(popupInterval);
     cleanupUIEffects();
 
     // --- SOUND: VICTORY ---
-    document.getElementById('audio-bg').pause(); // Stop game music
+    document.getElementById('audio-bg').pause(); 
+    
+    // --- UPDATED: Stop Snake SFX ---
+    if (snakeSFX) {
+        snakeSFX.pause();
+        snakeSFX.currentTime = 0;
+    }
+    // -------------------------------
     
     const winAudio = new Audio('/static/john-cena-meme-original.mp3');
     winAudio.volume = 1.0;
@@ -697,6 +677,12 @@ function restartGame() {
         introAudio.pause();
         introAudio.currentTime = 0;
     }
+    
+    // Safety cleanup for Snake SFX
+    if (snakeSFX) {
+        snakeSFX.pause();
+        snakeSFX.currentTime = 0;
+    }
 
     document.getElementById('view-gameover').style.display = 'none';
     cleanupUIEffects();
@@ -706,12 +692,10 @@ function restartGame() {
 function cleanupUIEffects() {
 
     document.getElementById('view-game').classList.remove('shake'); 
-    document.body.classList.remove('shake'); // (Optional fallback)
+    document.body.classList.remove('shake'); 
 
-    // Remove all random popups
     document.querySelectorAll('.random-popup').forEach(popup => popup.remove());
 
-    // Remove global drag handlers
     document.onmousemove = null;
     document.onmouseup = null;
 }
