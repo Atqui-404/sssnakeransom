@@ -20,10 +20,24 @@ let userCaptchaCode = '';
 window.correctAnswer = null;
 let mathTimeout = null; 
 
-// MATH QUESTIONS
-// const mathQuestions = [
-//     { q: "Enter the captcha code shown earlier:", a: captchaCode }
-// ];
+
+// --- PRELOAD IMAGES ---
+const imagesToPreload = [
+    "/static/scare.jpg",
+    "/static/snake_normal.png",
+    "/static/snake_hungry.png",
+    "/static/snake_full.png"
+];
+
+function preloadImages() {
+    imagesToPreload.forEach((src) => {
+        const img = new Image();
+        img.src = src;
+        // This forces the browser to download and cache them NOW
+    });
+}
+// Call it immediately
+preloadImages();
 
 // RANDOM FACTS
 const randomFacts = [
@@ -520,36 +534,37 @@ function updateHealthBar() {
 }
 
 function showJumpScare() {
-    // 1. Create the Image
     const scare = document.createElement('img');
-    // FOR THE SCARE
     scare.src = "/static/scare.jpg"; 
-
     
-    // 2. Centered Styling
     scare.style.position = 'fixed';
     scare.style.top = '50%';
     scare.style.left = '50%';
-    // We don't need 'transform' here because the animation handles it now
-    
     scare.style.width = '100vw'; 
     scare.style.height = '100vh';
     scare.style.objectFit = 'contain'; 
     scare.style.zIndex = '99999';
     
-    // 3. FASTER ANIMATION (0.25s)
-    scare.style.animation = "flyAtScreen 0.25s ease-in forwards"; 
-
-    // 4. Play Sound (Optional)
-    // const scream = new Audio('static/scream.mp3');
-    // scream.play();
+    // Hide it initially so we don't see a broken icon
+    scare.style.opacity = '0';
 
     document.body.appendChild(scare);
 
-    // 5. Cleanup faster (250ms)
-    setTimeout(() => {
-        scare.remove();
-    }, 250);
+    // ONLY START ANIMATION WHEN LOADED
+    scare.onload = function() {
+        scare.style.opacity = '1'; // Make visible
+        scare.style.animation = "flyAtScreen 0.25s ease-in forwards"; 
+
+        // Start the removal timer NOW, not earlier
+        setTimeout(() => {
+            scare.remove();
+        }, 250);
+    };
+
+    // If it's already cached (fast load), trigger immediately
+    if (scare.complete) {
+        scare.onload();
+    }
 }
 
 function triggerGameOver(reason) {
