@@ -56,20 +56,22 @@ const randomFacts = [
     "FUN FACT: Your friends are being productive right now.",
     "REMINDER: You fell for the 'easy money' bait.",
     "FUN FACT: I am on 5 hours of sleep for the past 2 days.",
+    "HE IS COMING.",
     "HE IS COMING."
 ];
 
 const wordleWords = [
     "CHICK",
-    // "HACKS",
-    // "CODES",
-    // "BRAIN",
-    // "CRANE",
-    // "APPLE",
-    // "GRAPE",
-    // "PLANE",
-    // "SNAKE",
-    // "TRICK"
+    "HACKS",
+    "CODES",
+    "BRAIN",
+    "CRANE",
+    "APPLE",
+    "GRAPE",
+    "PLANE",
+    "SNAKE",
+    "TRICK",
+    "SUMAC"
 ];
 
 function startGame() {
@@ -149,12 +151,14 @@ function gameLoop() {
         updateStatus("⚠️ STARVING! PASTE FASTER!", "red");
         if (!snakeImg.src.includes('snake_hungry.png')) {
             snakeImg.src = "/static/snake_hungry.png";
+            new Audio('/static/starve.mp4').play();
         }
     } else if (chickenCount > 10) {
         health -= 4.0;
         updateStatus("⚠️⚠️⚠️ OVEREATING! DELETE CHICKENS!", "orange");
         if (!snakeImg.src.includes('snake_full.png')) {
             snakeImg.src = "/static/snake_full.png";
+            new Audio('/static/full.mp4').play();
         }
     } else {
         if (health < 100) health += 0.2;
